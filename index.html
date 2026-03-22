@@ -166,7 +166,6 @@
 <button id="saveBtn" class="btn btn-save" style="display:none;" onclick="downloadImage()">Download Invoice as PNG</button>
 
 <script>
-// আপডেট করা Apps Script URL
 const scriptURL = 'https://script.google.com/macros/s/AKfycbzHhqEqicV-15K0u_btgByLOxvGKJVRgfA9XF4UM74_zTjKGXU87AOtU21XmJ6JEmDj/exec';
 
 let basket = [];
@@ -216,7 +215,13 @@ function renderInvoice() {
     document.getElementById('rPharmName').innerText = document.getElementById('pName').value;
     document.getElementById('rOrderID').innerText = orderID;
     document.getElementById('rRef').innerText = orderID;
-    document.getElementById('rDate').innerText = new Date().toLocaleDateString('en-GB');
+
+    // --- UK TIME LOGIC ---
+    const options = { timeZone: 'Europe/London', day: '2-digit', month: '2-digit', year: 'numeric' };
+    const ukDate = new Intl.DateTimeFormat('en-GB', options).format(new Date());
+    document.getElementById('rDate').innerText = ukDate;
+    // ----------------------
+
     document.getElementById('rCust').innerText = document.getElementById('inCust').value || "Valued Customer";
     document.getElementById('rAddr').innerText = document.getElementById('inAddr').value || "TBC";
     document.getElementById('rTrack').innerText = document.getElementById('inTrack').value || "Processing";
@@ -270,7 +275,7 @@ function searchCustomer() {
 }
 
 function downloadImage() {
-    saveToSheet(); // ডাউনলোডে ক্লিক করলে একই সাথে ডাটা শিটে যাবে
+    saveToSheet();
     html2canvas(document.getElementById('invoice'), { scale: 2 }).then(canvas => {
         const imageData = canvas.toDataURL("image/png");
         if (window.AppInventor) { window.AppInventor.setWebViewString(imageData); } 

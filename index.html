@@ -8,7 +8,6 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .setup-card { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 650px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        /* Invoice Styling */
         #invoice { 
             background: white; width: 794px; min-height: 1000px; padding: 50px; display: none; 
             color: #1a1a1a; position: relative; border: 1px solid #ddd; overflow: hidden;
@@ -28,15 +27,7 @@
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
         .details-box h4 { margin: 0 0 8px 0; border-bottom: 1px solid #000; padding-bottom: 2px; }
         
-        /* Address Formatting */
-        #rAddr { 
-            white-space: pre-wrap; 
-            display: block; 
-            line-height: 1.5; 
-            margin-top: 5px;
-            font-style: normal;
-        }
-
+        #rAddr { white-space: pre-wrap; display: block; line-height: 1.5; margin-top: 5px; font-style: normal; }
         .table-style { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .table-style th { background: #f2f2f2; padding: 12px; border: 1px solid #ddd; text-align: left; }
         .table-style td { padding: 12px; border: 1px solid #ddd; }
@@ -46,7 +37,6 @@
         .summary-box { width: 250px; line-height: 2; }
         .grand-total { font-size: 20px; font-weight: bold; border-top: 2px solid #333; }
 
-        /* Form Styling */
         .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .form-group { flex: 1; display: flex; flex-direction: column; }
         label { font-size: 11px; font-weight: bold; color: #555; }
@@ -63,17 +53,14 @@
 
 <div class="setup-card">
     <h2 style="margin-top:0;">Invoice Customizer</h2>
-    
     <div class="form-row">
         <div class="form-group"><label>Pharmacy Name</label><input type="text" id="pName" value="RestEasy Pharma"></div>
         <div class="form-group"><label>Upload Watermark</label><input type="file" id="wmInput" accept="image/*" onchange="loadWatermark(event)"></div>
     </div>
-
     <div class="form-row">
         <div class="form-group"><label>Order ID</label><input type="text" id="inOrderID"></div>
         <div class="form-group"><label>Tracking Number</label><input type="text" id="inTrack" placeholder="e.g. GB123456789RM"></div>
     </div>
-
     <div class="form-row">
         <div class="form-group">
             <label>Delivery Method</label>
@@ -82,14 +69,12 @@
                 <option value="15">Special Delivery Guaranteed (£15.00)</option>
             </select>
         </div>
-        <div class="form-group"><label>Customer Name</label><input type="text" id="inCust" placeholder="Full Name"></div>
+        <div class="form-group"><label>Customer Name</label><input type="text" id="inCust" placeholder="Full Name" onblur="searchCustomer()"></div>
     </div>
-
     <div class="form-group">
-        <label>Shipping Address (Enter line by line for best formation)</label>
+        <label>Shipping Address</label>
         <textarea id="inAddr" rows="4" placeholder="Flat/House No, Street&#10;City&#10;Postcode"></textarea>
     </div>
-
     <div style="background:#f9f9f9; padding:15px; border:1px solid #ddd; margin-top:15px; border-radius:8px;">
         <label>Add Medicines</label>
         <div class="form-row" style="align-items: flex-end;">
@@ -121,13 +106,11 @@
             <input type="number" id="inQty" value="10" min="1" style="flex:0.5;">
             <button onclick="addToBasket()" class="btn" style="background:#333; color:white;">Add Item</button>
         </div>
-        
         <table id="basketList">
             <thead><tr><th>Medicine</th><th>Qty</th><th>Price</th><th>Action</th></tr></thead>
             <tbody id="basketBody"></tbody>
         </table>
     </div>
-
     <button class="btn btn-gen" onclick="renderInvoice()">Generate Invoice</button>
 </div>
 
@@ -146,7 +129,6 @@
                 <p>Status: <span style="color:green; font-weight:bold;">PAID</span></p>
             </div>
         </div>
-
         <div class="details-grid">
             <div class="details-box">
                 <h4>Shipping To</h4>
@@ -159,19 +141,10 @@
                 <strong>Packaging:</strong> Discreet/Plain</p>
             </div>
         </div>
-
         <table class="table-style">
-            <thead>
-                <tr>
-                    <th>Item Description</th>
-                    <th style="text-align:center;">Qty</th>
-                    <th style="text-align:right;">Price</th>
-                    <th style="text-align:right;">Total</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Item Description</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Total</th></tr></thead>
             <tbody id="rTableBody"></tbody>
         </table>
-
         <div class="summary-wrapper">
             <div class="payment-info">
                 <strong>Payment Method: Bank Transfer</strong><br>
@@ -184,7 +157,6 @@
                 <div style="display:flex; justify-content:space-between;" class="grand-total"><span>Grand Total:</span><span id="rTotal"></span></div>
             </div>
         </div>
-
         <div style="margin-top:50px; border: 1.5px dashed #ccc; padding: 15px; text-align: center; font-size: 13px; border-radius: 8px;">
             This parcel is shipped as <strong>Private Health Supplies</strong>. <br>Please allow up to 24 hours for the tracking number to update on the carrier's website.
         </div>
@@ -194,6 +166,9 @@
 <button id="saveBtn" class="btn btn-save" style="display:none;" onclick="downloadImage()">Download Invoice as PNG</button>
 
 <script>
+// আপডেট করা Apps Script URL
+const scriptURL = 'https://script.google.com/macros/s/AKfycbzHhqEqicV-15K0u_btgByLOxvGKJVRgfA9XF4UM74_zTjKGXU87AOtU21XmJ6JEmDj/exec';
+
 let basket = [];
 
 window.onload = () => {
@@ -215,13 +190,8 @@ function addToBasket() {
     const name = med.options[med.selectedIndex].text.split(' - ')[0];
     const price = parseFloat(med.value);
     const qty = parseInt(document.getElementById('inQty').value);
-
     const existingItem = basket.find(item => item.name === name);
-    if (existingItem) {
-        existingItem.qty += qty;
-    } else {
-        basket.push({ name, price, qty });
-    }
+    if (existingItem) { existingItem.qty += qty; } else { basket.push({ name, price, qty }); }
     updateBasketUI();
 }
 
@@ -234,18 +204,12 @@ function updateBasketUI() {
     const tbody = document.getElementById('basketBody');
     tbody.innerHTML = "";
     basket.forEach((item, index) => {
-        tbody.innerHTML += `<tr>
-            <td>${item.name}</td>
-            <td>${item.qty}</td>
-            <td>£${item.price.toFixed(2)}</td>
-            <td><button onclick="removeFromBasket(${index})" style="color:red; border:none; background:none; cursor:pointer;">✖</button></td>
-        </tr>`;
+        tbody.innerHTML += `<tr><td>${item.name}</td><td>${item.qty}</td><td>£${item.price.toFixed(2)}</td><td><button onclick="removeFromBasket(${index})" style="color:red; border:none; background:none; cursor:pointer;">✖</button></td></tr>`;
     });
 }
 
 function renderInvoice() {
     if(basket.length === 0) return alert("Please add at least one item!");
-    
     const orderID = document.getElementById('inOrderID').value;
     const shipCost = parseFloat(document.getElementById('inShipCost').value);
     
@@ -254,19 +218,14 @@ function renderInvoice() {
     document.getElementById('rRef').innerText = orderID;
     document.getElementById('rDate').innerText = new Date().toLocaleDateString('en-GB');
     document.getElementById('rCust').innerText = document.getElementById('inCust').value || "Valued Customer";
-    
-    // Address with Formatting
     document.getElementById('rAddr').innerText = document.getElementById('inAddr').value || "TBC";
-    
     document.getElementById('rTrack').innerText = document.getElementById('inTrack').value || "Processing";
     
-    // Shipping Logic
     const carrierName = (shipCost === 15) ? "Special Delivery Guaranteed" : "Royal Mail Tracked 24";
     document.getElementById('rCarrier').innerText = carrierName;
     document.getElementById('rShipDisp').innerText = "£" + shipCost.toFixed(2);
 
-    let sub = 0;
-    let rows = "";
+    let sub = 0; let rows = "";
     basket.forEach(item => {
         let lineTotal = item.price * item.qty;
         sub += lineTotal;
@@ -276,20 +235,48 @@ function renderInvoice() {
     document.getElementById('rTableBody').innerHTML = rows;
     document.getElementById('rSub').innerText = "£" + sub.toFixed(2);
     document.getElementById('rTotal').innerText = "£" + (sub + shipCost).toFixed(2);
-
     document.getElementById('invoice').style.display = 'block';
     document.getElementById('saveBtn').style.display = 'block';
 }
 
+function saveToSheet() {
+    const medDetails = basket.map(i => i.name + " (" + i.qty + " pc) - £" + (i.price * i.qty).toFixed(2)).join(" | ");
+    const data = {
+        orderID: document.getElementById('rOrderID').innerText,
+        name: document.getElementById('rCust').innerText,
+        address: document.getElementById('rAddr').innerText,
+        medicines: medDetails,
+        subtotal: document.getElementById('rSub').innerText,
+        shipping: document.getElementById('rShipDisp').innerText,
+        total: document.getElementById('rTotal').innerText
+    };
+
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        cache: 'no-cache',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+    }).then(() => console.log("Data Saved Successfully"));
+}
+
+function searchCustomer() {
+    const name = document.getElementById('inCust').value;
+    if(!name) return;
+    fetch(scriptURL + '?name=' + encodeURIComponent(name))
+    .then(r => r.json())
+    .then(d => { if(d.address) document.getElementById('inAddr').value = d.address; })
+    .catch(e => console.log("New Customer"));
+}
+
 function downloadImage() {
+    saveToSheet(); // ডাউনলোডে ক্লিক করলে একই সাথে ডাটা শিটে যাবে
     html2canvas(document.getElementById('invoice'), { scale: 2 }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'Pharma_Invoice_' + document.getElementById('rOrderID').innerText + '.png';
-        link.href = canvas.toDataURL();
-        link.click();
+        const imageData = canvas.toDataURL("image/png");
+        if (window.AppInventor) { window.AppInventor.setWebViewString(imageData); } 
+        else { const link = document.createElement('a'); link.download = 'Pharma_Invoice.png'; link.href = imageData; link.click(); }
     });
 }
 </script>
-
 </body>
 </html>

@@ -78,7 +78,7 @@
     <div style="background:#f9f9f9; padding:15px; border:1px solid #ddd; margin-top:15px; border-radius:8px;">
         <label>Add Medicines</label>
         <div class="form-row" style="align-items: flex-end;">
-            <select id="inMed" style="flex:2;">
+            <select id="inMed" style="flex:2;" onchange="toggleCustomInput()">
                 <option value="0.90">Easium Diaz (Diazepam) - £0.90</option>
                 <option value="1.00">Sedil 5mg (Diazepam) - £1.00</option>
                 <option value="1.40">Alprax 1mg (Alprazolam) - £1.40</option>
@@ -94,7 +94,6 @@
                 <option value="1.00">Pregabalin (Lyrica) - £1.00</option>
                 <option value="0.50">Royal 225mg (Tramadol HCl) - £0.50</option>
                 <option value="1.50">Tramadol (Ultram) - £1.50</option>
-                <option value="1.50">Tependadol 100mg (Tapentadol) - £1.50</option>
                 <option value="1.40">Tapenta 200mg (Tapentadol) - £1.40</option>
                 <option value="1.50">Aspadol 200mg (Tapentadol) - £1.50</option>
                 <option value="1.30">Co-codamol (Codeine Mix) - £1.30</option>
@@ -103,9 +102,22 @@
                 <option value="1.50">Temaz (Temazepam) - £1.50</option>
                 <option value="1.40">Pase2 (Diazepam) - £1.40</option>
                 <option value="1.00">Modafinil (Provigil) - £1.00</option>
+                <option value="CUSTOM">-- Custom (Type Name Below) --</option>
             </select>
             <input type="number" id="inQty" value="10" min="1" style="flex:0.5;">
             <button onclick="addToBasket()" class="btn" style="background:#333; color:white;">Add Item</button>
+        </div>
+        <div id="customMedBox" style="display:none; margin-top:10px;">
+            <div class="form-row">
+                <div class="form-group" style="flex:2;">
+                    <label>Custom Medicine Name</label>
+                    <input type="text" id="customMedName" placeholder="Enter medicine name...">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Price per Unit (£)</label>
+                    <input type="number" id="customMedPrice" step="0.01" value="1.00">
+                </div>
+            </div>
         </div>
         <table id="basketList">
             <thead><tr><th>Medicine</th><th>Qty</th><th>Price</th><th>Action</th></tr></thead>
@@ -175,6 +187,12 @@ window.onload = () => {
     document.getElementById('inOrderID').value = "RE-" + Math.floor(100000 + Math.random() * 900000);
 }
 
+function toggleCustomInput() {
+    const medSelect = document.getElementById('inMed');
+    const customBox = document.getElementById('customMedBox');
+    customBox.style.display = (medSelect.value === "CUSTOM") ? "block" : "none";
+}
+
 function loadWatermark(event) {
     const reader = new FileReader();
     reader.onload = function() {
@@ -187,11 +205,26 @@ function loadWatermark(event) {
 
 function addToBasket() {
     const med = document.getElementById('inMed');
-    const name = med.options[med.selectedIndex].text.split(' - ')[0];
-    const price = parseFloat(med.value);
+    let name, price;
+    
+    if (med.value === "CUSTOM") {
+        name = document.getElementById('customMedName').value;
+        price = parseFloat(document.getElementById('customMedPrice').value);
+        if (!name || isNaN(price)) return alert("Please enter custom name and price!");
+    } else {
+        name = med.options[med.selectedIndex].text.split(' - ')[0];
+        price = parseFloat(med.value);
+    }
+
     const qty = parseInt(document.getElementById('inQty').value);
     const existingItem = basket.find(item => item.name === name);
     if (existingItem) { existingItem.qty += qty; } else { basket.push({ name, price, qty }); }
+    
+    // Reset custom fields
+    if (med.value === "CUSTOM") {
+        document.getElementById('customMedName').value = "";
+    }
+    
     updateBasketUI();
 }
 
@@ -221,8 +254,7 @@ function renderInvoice() {
     const options = { timeZone: 'Europe/London', day: '2-digit', month: '2-digit', year: 'numeric' };
     const ukDate = new Intl.DateTimeFormat('en-GB', options).format(new Date());
     document.getElementById('rDate').innerText = ukDate;
-    // ----------------------
-
+    
     document.getElementById('rCust').innerText = document.getElementById('inCust').value || "Valued Customer";
     document.getElementById('rAddr').innerText = document.getElementById('inAddr').value || "TBC";
     document.getElementById('rTrack').innerText = document.getElementById('inTrack').value || "Processing";

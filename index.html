@@ -259,7 +259,7 @@ function renderInvoice() {
     document.getElementById('rAddr').innerText = document.getElementById('inAddr').value || "TBC";
     document.getElementById('rTrack').innerText = document.getElementById('inTrack').value || "Processing";
     
-    const carrierName = (shipCost === 15) ? "Special Delivery Guaranteed" : "Royal Mail Tracked 24";
+    const carrierName = (shipCost === 15) ? "Special Delivery Guaranteed" : "Royal Mail";
     document.getElementById('rCarrier').innerText = carrierName;
     document.getElementById('rShipDisp').innerText = "£" + shipCost.toFixed(2);
 

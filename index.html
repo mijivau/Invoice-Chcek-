@@ -27,13 +27,7 @@
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
         .details-box h4 { margin: 0 0 8px 0; border-bottom: 1px solid #000; padding-bottom: 2px; text-transform: uppercase; font-size: 14px; }
         
-        #rAddr { 
-            white-space: pre-wrap; 
-            line-height: 1.2; 
-            display: block; 
-            margin-top: 4px;
-            font-size: 14px;
-        }
+        #rAddr { white-space: pre-wrap; line-height: 1.2; display: block; margin-top: 4px; font-size: 14px; }
 
         .table-style { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .table-style th { background: #f2f2f2; padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 14px; }
@@ -98,7 +92,7 @@
     <div style="background:#f8f9fa; padding:15px; border-radius:10px; border:1px solid #dee2e6;">
         <div class="form-row">
             <div class="form-group" style="flex:2.5;">
-                <label>Select Medicine (Brand + Generic)</label>
+                <label>Select Medicine</label>
                 <select id="inMed" onchange="autoFillPrice()">
                     <option value="">-- Loading Medicines... --</option>
                 </select>
@@ -181,12 +175,9 @@
 <button id="saveBtn" class="btn btn-save" style="display:none;" onclick="downloadImage()">DOWNLOAD INVOICE AS PNG</button>
 
 <script>
-// ১ নম্বর ডিপ্লয়মেন্ট (যেখান থেকে ডেটা আসবে এবং সেভ হবে)
 const scriptURL = 'https://script.google.com/macros/s/AKfycbyT68V8850EOJ_JR2w6aPT74cA_huxbWYD5gusW3CmFWInDrONAWlc72kiEo6EMaHJPgA/exec';
+const scriptURL2 = 'https://script.google.com/macros/s/AKfycbygVG3rWYZbqU42lp3tYehB_klcD1_q4BSs4iHa7cfP2OAjbqxgLblHZE25JbVEZwiQ/exec'; // এখানে আপনার দ্বিতীয় URL দিন
 
-// ২ নম্বর ডিপ্লয়মেন্ট (যেখানে শুধু ডেটা কপি হিসেবে সেভ হবে)
-const scriptURL2 = 'https://script.google.com/macros/s/AKfycbygVG3rWYZbqU42lp3tYehB_klcD1_q4BSs4iHa7cfP2OAjbqxgLblHZE25JbVEZwiQ/exec'; 
-    
 let basket = [];
 let allMeds = [];
 
@@ -196,7 +187,6 @@ window.onload = async () => {
         const response = await fetch(scriptURL + "?action=getData");
         const data = await response.json();
         allMeds = data.medicines; 
-        
         const select = document.getElementById('inMed');
         select.innerHTML = '<option value="">-- Select Medicine --</option>';
         allMeds.forEach(m => {
@@ -227,14 +217,11 @@ function addToBasket() {
     const medObj = allMeds.find(m => m.name === medName);
     const price = parseFloat(document.getElementById('unitPrice').value);
     const qty = parseInt(document.getElementById('inQty').value);
-
     if(!medName || isNaN(price)) return alert("Select medicine first!");
-
     const fullName = `${medObj.name} (${medObj.generic})`;
     const existing = basket.find(i => i.name === fullName);
     if(existing) { existing.qty += qty; } 
     else { basket.push({ name: fullName, price: price, qty: qty }); }
-    
     updateBasketUI();
 }
 
@@ -253,7 +240,6 @@ function removeFromBasket(index) {
 
 function renderInvoice() {
     if(basket.length === 0) return alert("Basket is empty!");
-    
     document.getElementById('rPharmName').innerText = document.getElementById('pName').value;
     document.getElementById('rOrderID').innerText = document.getElementById('inOrderID').value;
     document.getElementById('rRef').innerText = document.getElementById('inOrderID').value;
@@ -261,22 +247,18 @@ function renderInvoice() {
     document.getElementById('rCust').innerText = document.getElementById('inCust').value || "Customer";
     document.getElementById('rAddr').innerText = document.getElementById('inAddr').value;
     document.getElementById('rTrack').innerText = document.getElementById('inTrack').value || "Processing";
-
     const ship = parseFloat(document.getElementById('inShipCost').value);
     document.getElementById('rCarrier').innerText = (ship === 15) ? "Special Delivery Guaranteed" : "Royal Mail";
     document.getElementById('rShipDisp').innerText = "£" + ship.toFixed(2);
-
     let sub = 0; let rows = "";
     basket.forEach(item => {
         let total = item.price * item.qty;
         sub += total;
         rows += `<tr><td>${item.name}</td><td style="text-align:center;">${item.qty}</td><td style="text-align:right;">£${item.price.toFixed(2)}</td><td style="text-align:right;">£${total.toFixed(2)}</td></tr>`;
     });
-
     document.getElementById('rTableBody').innerHTML = rows;
     document.getElementById('rSub').innerText = "£" + sub.toFixed(2);
     document.getElementById('rTotal').innerText = "£" + (sub + ship).toFixed(2);
-    
     document.getElementById('invoice').style.display = 'block';
     document.getElementById('saveBtn').style.display = 'block';
 }
@@ -300,19 +282,21 @@ function searchCustomer() {
 }
 
 function downloadImage() {
-    const medDetails = basket.map(i => `${i.name} x${i.qty}`).join(" | ");
+    // ডেটা ফরম্যাট করা হচ্ছে: "Medicine Name (Qty) - £Price"
+    const medDetails = basket.map(i => `${i.name} (${i.qty} pc) - £${(i.price * i.qty).toFixed(2)}`).join(" | ");
+    
     const data = {
         orderID: document.getElementById('rOrderID').innerText,
         name: document.getElementById('rCust').innerText,
         address: document.getElementById('rAddr').innerText,
         medicines: medDetails,
+        subtotal: document.getElementById('rSub').innerText,
+        shipping: document.getElementById('rShipDisp').innerText,
         total: document.getElementById('rTotal').innerText
     };
 
-    // ১ম লিঙ্কে ডেটা পাঠানো
+    // উভয় URL-এ ডেটা পাঠানো
     fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-    
-    // ২য় লিঙ্কে ডেটা পাঠানো
     fetch(scriptURL2, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
 
     html2canvas(document.getElementById('invoice'), { scale: 2 }).then(canvas => {

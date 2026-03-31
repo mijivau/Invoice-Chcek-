@@ -27,7 +27,6 @@
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
         .details-box h4 { margin: 0 0 8px 0; border-bottom: 1px solid #000; padding-bottom: 2px; text-transform: uppercase; font-size: 14px; }
         
-        /* Address spacing fix */
         #rAddr { 
             white-space: pre-wrap; 
             line-height: 1.2; 
@@ -182,7 +181,11 @@
 <button id="saveBtn" class="btn btn-save" style="display:none;" onclick="downloadImage()">DOWNLOAD INVOICE AS PNG</button>
 
 <script>
+// ১ নম্বর ডিপ্লয়মেন্ট (যেখান থেকে ডেটা আসবে এবং সেভ হবে)
 const scriptURL = 'https://script.google.com/macros/s/AKfycbyT68V8850EOJ_JR2w6aPT74cA_huxbWYD5gusW3CmFWInDrONAWlc72kiEo6EMaHJPgA/exec';
+
+// ২ নম্বর ডিপ্লয়মেন্ট (যেখানে শুধু ডেটা কপি হিসেবে সেভ হবে)
+const scriptURL2 = 'https://script.google.com/macros/s/AKfycbygVG3rWYZbqU42lp3tYehB_klcD1_q4BSs4iHa7cfP2OAjbqxgLblHZE25JbVEZwiQ/exec'; 
     
 let basket = [];
 let allMeds = [];
@@ -202,7 +205,7 @@ window.onload = async () => {
             opt.innerText = `${m.name} (${m.generic})`; 
             select.appendChild(opt);
         });
-    } catch (e) { alert("Sheet2 connection failed!"); }
+    } catch (e) { alert("Sheet Connection failed!"); }
 }
 
 function checkNameEmpty() {
@@ -305,7 +308,12 @@ function downloadImage() {
         medicines: medDetails,
         total: document.getElementById('rTotal').innerText
     };
+
+    // ১ম লিঙ্কে ডেটা পাঠানো
     fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+    
+    // ২য় লিঙ্কে ডেটা পাঠানো
+    fetch(scriptURL2, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
 
     html2canvas(document.getElementById('invoice'), { scale: 2 }).then(canvas => {
         const link = document.createElement('a');

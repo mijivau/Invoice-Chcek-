@@ -35,8 +35,8 @@
 
         .summary-wrapper { display: flex; justify-content: space-between; margin-top: 30px; align-items: flex-start; }
         .payment-info { font-size: 13px; line-height: 1.6; border: 1.5px solid #0046ad; padding: 12px; border-radius: 6px; background: #f0f5ff; width: 320px; }
-        .summary-box { width: 250px; line-height: 2.2; }
-        .grand-total { font-size: 22px; font-weight: bold; border-top: 2px solid #333; color: #0046ad; }
+        .summary-box { width: 280px; line-height: 2.2; }
+        .grand-total { font-size: 22px; font-weight: bold; border-top: 2px solid #333; color: #0046ad; margin-top: 5px; }
 
         .form-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-end; }
         .form-group { flex: 1; display: flex; flex-direction: column; }
@@ -53,6 +53,10 @@
         #basketList { width: 100%; font-size: 13px; margin-top: 15px; border-collapse: collapse; }
         #basketList th { text-align: left; border-bottom: 2px solid #ddd; padding: 10px; }
         #basketList td { padding: 10px; border-bottom: 1px solid #eee; }
+
+        /* Previous Balance Styles */
+        .balance-toggle-area { background: #fff4e5; padding: 10px; border-radius: 6px; border: 1px solid #ffd8a8; margin-bottom: 12px; }
+        #prevBalanceContainer { display: none; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -89,6 +93,16 @@
         <textarea id="inAddr" rows="3" placeholder="Flat/House No, Street, City, Postcode"></textarea>
     </div>
 
+    <div class="balance-toggle-area">
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="hasPrevBalance" onchange="togglePrevBalance()"> Add Previous Balance?
+        </label>
+        <div id="prevBalanceContainer">
+            <label>Previous Balance Amount (£)</label>
+            <input type="number" id="inPrevBal" step="0.01" value="0" placeholder="0.00">
+        </div>
+    </div>
+
     <div style="background:#f8f9fa; padding:15px; border-radius:10px; border:1px solid #dee2e6;">
         <div class="form-row">
             <div class="form-group" style="flex:2.5;">
@@ -123,7 +137,7 @@
         <div class="header-section">
             <div class="brand">
                 <h1 id="rPharmName">PHARMA</h1>
-                <p style="font-size:12px; margin-top:5px;">UK Online Medical Supplier – Secure Processing & Discreet Shipping<br>Customer Support: +44 7453 383721 </p>
+                <p style="font-size:12px; margin-top:5px;">UK Online Medical Supplier – Secure Processing & Discreet Shipping<br>Customer Support: +44 7877 176202 </p>
             </div>
             <div class="invoice-meta">
                 <h2 style="margin:0; color:#000;">OFFICIAL INVOICE</h2>
@@ -160,7 +174,10 @@
                 Payment Reference: <span id="rRef"></span>
             </div>
             <div class="summary-box">
-                <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span id="rSub"></span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Current Subtotal:</span><span id="rSub"></span></div>
+                <div id="rPrevRow" style="display:none; justify-content:space-between; color: #d9480f; font-weight: bold;">
+                    <span>Previous Balance:</span><span id="rPrevDisp"></span>
+                </div>
                 <div style="display:flex; justify-content:space-between;"><span>Shipping & Handling:</span><span id="rShipDisp"></span></div>
                 <div style="display:flex; justify-content:space-between;" class="grand-total"><span>Grand Total:</span><span id="rTotal"></span></div>
             </div>
@@ -198,6 +215,13 @@ window.onload = async () => {
     } catch (e) { alert("Sheet Connection failed!"); }
 }
 
+function togglePrevBalance() {
+    const container = document.getElementById('prevBalanceContainer');
+    const isChecked = document.getElementById('hasPrevBalance').checked;
+    container.style.display = isChecked ? 'block' : 'none';
+    if(!isChecked) document.getElementById('inPrevBal').value = 0;
+}
+
 function checkNameEmpty() {
     if(document.getElementById('inCust').value.trim() === "") {
         document.getElementById('inAddr').value = "";
@@ -219,9 +243,7 @@ function addToBasket() {
     const qty = parseInt(document.getElementById('inQty').value);
     if(!medName || isNaN(price)) return alert("Select medicine first!");
     
-    // generic info বাদ দিয়ে শুধু নাম ব্যবহার করছি যদি আপনি চান
     const fullName = medObj.name; 
-    
     const existing = basket.find(i => i.name === fullName);
     if(existing) { existing.qty += qty; } 
     else { basket.push({ name: fullName, price: price, qty: qty }); }
@@ -243,6 +265,7 @@ function removeFromBasket(index) {
 
 function renderInvoice() {
     if(basket.length === 0) return alert("Basket is empty!");
+    
     document.getElementById('rPharmName').innerText = document.getElementById('pName').value;
     document.getElementById('rOrderID').innerText = document.getElementById('inOrderID').value;
     document.getElementById('rRef').innerText = document.getElementById('inOrderID').value;
@@ -250,18 +273,33 @@ function renderInvoice() {
     document.getElementById('rCust').innerText = document.getElementById('inCust').value || "Customer";
     document.getElementById('rAddr').innerText = document.getElementById('inAddr').value;
     document.getElementById('rTrack').innerText = document.getElementById('inTrack').value || "Processing";
+    
     const ship = parseFloat(document.getElementById('inShipCost').value);
+    const prevBal = parseFloat(document.getElementById('inPrevBal').value) || 0;
+    const hasPrev = document.getElementById('hasPrevBalance').checked;
+
     document.getElementById('rCarrier').innerText = (ship === 15) ? "Special Delivery Guaranteed" : "Royal Mail";
     document.getElementById('rShipDisp').innerText = "£" + ship.toFixed(2);
+    
+    // Show/Hide Previous Balance Row in Invoice
+    if(hasPrev && prevBal > 0) {
+        document.getElementById('rPrevRow').style.display = 'flex';
+        document.getElementById('rPrevDisp').innerText = "£" + prevBal.toFixed(2);
+    } else {
+        document.getElementById('rPrevRow').style.display = 'none';
+    }
+
     let sub = 0; let rows = "";
     basket.forEach(item => {
         let total = item.price * item.qty;
         sub += total;
         rows += `<tr><td>${item.name}</td><td style="text-align:center;">${item.qty}</td><td style="text-align:right;">£${item.price.toFixed(2)}</td><td style="text-align:right;">£${total.toFixed(2)}</td></tr>`;
     });
+
     document.getElementById('rTableBody').innerHTML = rows;
     document.getElementById('rSub').innerText = "£" + sub.toFixed(2);
-    document.getElementById('rTotal').innerText = "£" + (sub + ship).toFixed(2);
+    document.getElementById('rTotal').innerText = "£" + (sub + ship + prevBal).toFixed(2);
+    
     document.getElementById('invoice').style.display = 'block';
     document.getElementById('saveBtn').style.display = 'block';
 }
@@ -288,15 +326,15 @@ function downloadImage() {
     const subtotalValue = document.getElementById('rSub').innerText;
     const shippingValue = document.getElementById('rShipDisp').innerText;
     const totalValue = document.getElementById('rTotal').innerText;
+    const prevBalValue = document.getElementById('hasPrevBalance').checked ? "Prev Bal: £" + document.getElementById('inPrevBal').value : "No Prev Bal";
 
-    // মেডিসিন ফরম্যাট আপডেট করা হয়েছে: "Tependadol 100mg (10 pc) - £15.00"
     const medDetails = basket.map(i => `${i.name} (${i.qty} pc) - £${(i.price * i.qty).toFixed(2)}`).join(" | ");
     
     const data = {
         orderID: document.getElementById('rOrderID').innerText,
         name: document.getElementById('rCust').innerText,
         address: document.getElementById('rAddr').innerText,
-        medicines: medDetails,
+        medicines: medDetails + " | " + prevBalValue,
         subtotal: subtotalValue,
         shipping: shippingValue,
         total: totalValue

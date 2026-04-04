@@ -5,9 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Pharma Invoice</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .setup-card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 700px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #0046ad; }
+        .setup-card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 750px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #0046ad; }
+        
+        .select2-container .select2-selection--single { height: 40px !important; border: 1px solid #ccc !important; border-radius: 6px !important; }
+        .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 40px !important; font-size: 14px; }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 38px !important; }
         
         #invoice { 
             background: white; width: 794px; min-height: 1000px; padding: 50px; display: none; 
@@ -45,7 +54,8 @@
         input:focus { border-color: #0046ad; }
 
         .btn { padding: 12px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
-        .btn-add { background: #333; color: white; padding: 10px 20px; }
+        .btn-add { background: #333; color: white; padding: 10px 15px; height: 40px; }
+        .btn-double { background: #0046ad; color: white; padding: 10px 10px; height: 40px; font-size: 12px; }
         .btn-add:hover { background: #000; }
         .btn-gen { background: #0046ad; color: white; width: 100%; margin-top: 15px; font-size: 16px; }
         .btn-save { background: #28a745; color: white; width: 794px; margin-top: 15px; font-size: 16px; }
@@ -54,7 +64,6 @@
         #basketList th { text-align: left; border-bottom: 2px solid #ddd; padding: 10px; }
         #basketList td { padding: 10px; border-bottom: 1px solid #eee; }
 
-        /* Previous Balance Styles */
         .balance-toggle-area { background: #fff4e5; padding: 10px; border-radius: 6px; border: 1px solid #ffd8a8; margin-bottom: 12px; }
         #prevBalanceContainer { display: none; margin-top: 8px; }
     </style>
@@ -105,20 +114,21 @@
 
     <div style="background:#f8f9fa; padding:15px; border-radius:10px; border:1px solid #dee2e6;">
         <div class="form-row">
-            <div class="form-group" style="flex:2.5;">
-                <label>Select Medicine</label>
-                <select id="inMed" onchange="autoFillPrice()">
+            <div class="form-group" style="flex:2;">
+                <label>Select Medicine (Searchable)</label>
+                <select id="inMed" class="select-search" onchange="autoFillPrice()">
                     <option value="">-- Loading Medicines... --</option>
                 </select>
             </div>
-            <div class="form-group" style="flex:0.8;">
+            <div class="form-group" style="flex:0.7;">
                 <label>Price (£)</label>
                 <input type="number" id="unitPrice" step="0.01" readonly style="background:#e9ecef;">
             </div>
-            <div class="form-group" style="flex:0.6;">
+            <div class="form-group" style="flex:0.5;">
                 <label>Qty</label>
                 <input type="number" id="inQty" value="1" min="1">
             </div>
+            <button onclick="doubleQty()" class="btn btn-double">⬜</button>
             <button onclick="addToBasket()" class="btn btn-add">ADD</button>
         </div>
         
@@ -137,7 +147,7 @@
         <div class="header-section">
             <div class="brand">
                 <h1 id="rPharmName">PHARMA</h1>
-                <p style="font-size:12px; margin-top:5px;">UK Online Medical Supplier – Secure Processing & Discreet Shipping<br>Customer Support: +44 7877 176202 </p>
+                <p style="font-size:12px; margin-top:5px;">UK Online Medical Supplier – Secure Processing & Discreet Shipping<br> Customer Support: +44 7877 176202 </p>
             </div>
             <div class="invoice-meta">
                 <h2 style="margin:0; color:#000;">OFFICIAL INVOICE</h2>
@@ -183,11 +193,25 @@
             </div>
         </div>
 
-        <div style="margin-top:60px; border: 1.5px dashed #bbb; padding: 15px; text-align: center; font-size: 13px; border-radius: 8px; color:#555;">
-            This parcel is shipped as <strong>Private Health Supplies</strong>. <br>Please allow up to 24 hours for the tracking number to update on the carrier's website.
-        </div>
+  <div style="margin-top: 50px; border: 1.5px dashed #0046ad; padding: 20px; text-align: center; font-size: 13px; border-radius: 10px; color: #333; background-color: #f8fbff; line-height: 1.6;">
+    <div style="font-weight: bold; color: #0046ad; text-transform: uppercase; margin-bottom: 8px; font-size: 14px; letter-spacing: 0.5px;">
+        Shipping & Delivery Notice
+    </div>
+    
+    <div>
+        This parcel is classified as <strong>Private Healthcare Supplies</strong> and is discreetly packaged for your privacy.
+    </div>
+    
+    <div style="margin-top: 5px;">
+        For any delivery enquiries, please quote your <strong>Tracking ID</strong> when contacting <strong>Royal Mail</strong>.
+    </div>
+    
+    <div style="margin-top: 15px; font-weight: 600; color: #555; font-style: italic;">
+        Thank you for choosing RestEasy Pharma.
     </div>
 </div>
+
+
 
 <button id="saveBtn" class="btn btn-save" style="display:none;" onclick="downloadImage()">DOWNLOAD INVOICE AS PNG</button>
 
@@ -199,6 +223,7 @@ let basket = [];
 let allMeds = [];
 
 window.onload = async () => {
+    $('.select-search').select2();
     document.getElementById('inOrderID').value = "RE-" + Math.floor(100000 + Math.random() * 900000);
     try {
         const response = await fetch(scriptURL + "?action=getData");
@@ -212,7 +237,15 @@ window.onload = async () => {
             opt.innerText = `${m.name} (${m.generic})`; 
             select.appendChild(opt);
         });
+        $('.select-search').select2();
     } catch (e) { alert("Sheet Connection failed!"); }
+}
+
+// Function to double the Qty
+function doubleQty() {
+    let qtyInput = document.getElementById('inQty');
+    let currentVal = parseInt(qtyInput.value) || 0;
+    qtyInput.value = currentVal * 2;
 }
 
 function togglePrevBalance() {
@@ -281,7 +314,6 @@ function renderInvoice() {
     document.getElementById('rCarrier').innerText = (ship === 15) ? "Special Delivery Guaranteed" : "Royal Mail";
     document.getElementById('rShipDisp').innerText = "£" + ship.toFixed(2);
     
-    // Show/Hide Previous Balance Row in Invoice
     if(hasPrev && prevBal > 0) {
         document.getElementById('rPrevRow').style.display = 'flex';
         document.getElementById('rPrevDisp').innerText = "£" + prevBal.toFixed(2);

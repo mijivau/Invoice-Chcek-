@@ -128,7 +128,7 @@
                 <label>Qty</label>
                 <input type="number" id="inQty" value="1" min="1">
             </div>
-            <button onclick="doubleQty()" class="btn btn-double">⬜</button>
+            <button onclick="doubleQty()" class="btn btn-double">+</button>
             <button onclick="addToBasket()" class="btn btn-add">ADD</button>
         </div>
         
@@ -147,7 +147,7 @@
         <div class="header-section">
             <div class="brand">
                 <h1 id="rPharmName">PHARMA</h1>
-                <p style="font-size:12px; margin-top:5px;">UK Online Medical Supplier – Secure Processing & Discreet Shipping<br> Customer Support: +44 7877 176202 </p>
+                <p style="font-size:12px; margin-top:5px;">UK Online Medical Supplier – Secure Processing & Discreet Shipping<br>Customer Support: +44 7877 176202 </p>
             </div>
             <div class="invoice-meta">
                 <h2 style="margin:0; color:#000;">OFFICIAL INVOICE</h2>
@@ -193,25 +193,11 @@
             </div>
         </div>
 
-  <div style="margin-top: 50px; border: 1.5px dashed #0046ad; padding: 20px; text-align: center; font-size: 13px; border-radius: 10px; color: #333; background-color: #f8fbff; line-height: 1.6;">
-    <div style="font-weight: bold; color: #0046ad; text-transform: uppercase; margin-bottom: 8px; font-size: 14px; letter-spacing: 0.5px;">
-        Shipping & Delivery Notice
-    </div>
-    
-    <div>
-        This parcel is classified as <strong>Private Healthcare Supplies</strong> and is discreetly packaged for your privacy.
-    </div>
-    
-    <div style="margin-top: 5px;">
-        For any delivery enquiries, please quote your <strong>Tracking ID</strong> when contacting <strong>Royal Mail</strong>.
-    </div>
-    
-    <div style="margin-top: 15px; font-weight: 600; color: #555; font-style: italic;">
-        Thank you for choosing RestEasy Pharma.
+        <div style="margin-top:60px; border: 1.5px dashed #bbb; padding: 15px; text-align: center; font-size: 13px; border-radius: 8px; color:#555;">
+            This parcel is shipped as <strong>Private Health Supplies</strong>. <br>Please allow up to 24 hours for the tracking number to update on the carrier's website.
+        </div>
     </div>
 </div>
-
-
 
 <button id="saveBtn" class="btn btn-save" style="display:none;" onclick="downloadImage()">DOWNLOAD INVOICE AS PNG</button>
 
@@ -385,3 +371,4 @@ function downloadImage() {
 </script>
 </body>
 </html>
+

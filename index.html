@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Pharma Invoice</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -13,59 +12,42 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .setup-card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 750px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #0046ad; }
-        
         .select2-container .select2-selection--single { height: 40px !important; border: 1px solid #ccc !important; border-radius: 6px !important; }
         .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 40px !important; font-size: 14px; }
         .select2-container--default .select2-selection--single .select2-selection__arrow { height: 38px !important; }
-        
-        #invoice { 
-            background: white; width: 794px; min-height: 1000px; padding: 50px; display: none; 
-            color: #1a1a1a; position: relative; border: 1px solid #ddd; box-sizing: border-box;
-        }
-
-        #watermark-display {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
-            width: 70%; opacity: 0.07; pointer-events: none; z-index: 0; display: none; object-fit: contain;
-        }
-        
+        #invoice { background: white; width: 794px; min-height: 1000px; padding: 50px; display: none; color: #1a1a1a; position: relative; border: 1px solid #ddd; box-sizing: border-box; }
+        #watermark-display { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); width: 70%; opacity: 0.07; pointer-events: none; z-index: 0; display: none; object-fit: contain; }
         .invoice-content { position: relative; z-index: 1; }
         .header-section { display: flex; justify-content: space-between; border-bottom: 3px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
         .brand h1 { font-size: 32px; margin: 0; color: #0046ad; text-transform: uppercase; font-weight: 800; }
         .invoice-meta { text-align: right; }
-        
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
         .details-box h4 { margin: 0 0 8px 0; border-bottom: 1px solid #000; padding-bottom: 2px; text-transform: uppercase; font-size: 14px; }
-        
         #rAddr { white-space: pre-wrap; line-height: 1.2; display: block; margin-top: 4px; font-size: 14px; }
-
         .table-style { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .table-style th { background: #f2f2f2; padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 14px; }
         .table-style td { padding: 12px; border: 1px solid #ddd; font-size: 14px; }
-
         .summary-wrapper { display: flex; justify-content: space-between; margin-top: 30px; align-items: flex-start; }
         .payment-info { font-size: 13px; line-height: 1.6; border: 1.5px solid #0046ad; padding: 12px; border-radius: 6px; background: #f0f5ff; width: 320px; }
         .summary-box { width: 280px; line-height: 2.2; }
         .grand-total { font-size: 22px; font-weight: bold; border-top: 2px solid #333; color: #0046ad; margin-top: 5px; }
-
         .form-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-end; }
         .form-group { flex: 1; display: flex; flex-direction: column; }
         label { font-size: 11px; font-weight: bold; color: #555; margin-bottom: 4px; }
         input, select, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; }
         input:focus { border-color: #0046ad; }
-
         .btn { padding: 12px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .btn-add { background: #333; color: white; padding: 10px 15px; height: 40px; }
         .btn-double { background: #0046ad; color: white; padding: 10px 10px; height: 40px; font-size: 12px; }
-        .btn-add:hover { background: #000; }
         .btn-gen { background: #0046ad; color: white; width: 100%; margin-top: 15px; font-size: 16px; }
         .btn-save { background: #28a745; color: white; width: 794px; margin-top: 15px; font-size: 16px; }
-        
         #basketList { width: 100%; font-size: 13px; margin-top: 15px; border-collapse: collapse; }
         #basketList th { text-align: left; border-bottom: 2px solid #ddd; padding: 10px; }
         #basketList td { padding: 10px; border-bottom: 1px solid #eee; }
-
         .balance-toggle-area { background: #fff4e5; padding: 10px; border-radius: 6px; border: 1px solid #ffd8a8; margin-bottom: 12px; }
         #prevBalanceContainer { display: none; margin-top: 8px; }
+        /* Tracking highlight style */
+        #rTrack { font-weight: 800; font-size: 16px; color: #000; }
     </style>
 </head>
 <body>
@@ -84,16 +66,14 @@
     </div>
 
     <div class="form-row">
+        <div class="form-group"><label>Carrier Name</label><input type="text" id="inCarrier" value="Royal Mail"></div>
+        <div class="form-group"><label>Delivery Cost (£)</label><input type="number" id="inShipCost" value="10.00" step="0.01"></div>
+    </div>
+
+    <div class="form-row">
         <div class="form-group" style="flex:1.5;">
             <label>Customer Name</label>
             <input type="text" id="inCust" placeholder="Enter name..." oninput="checkNameEmpty()" onblur="searchCustomer()">
-        </div>
-        <div class="form-group">
-            <label>Delivery Method</label>
-            <select id="inShipCost">
-                <option value="10">Next Day Delivery (£10.00)</option>
-                <option value="15">Special Delivery (£15.00)</option>
-            </select>
         </div>
     </div>
 
@@ -167,7 +147,7 @@
             <div class="details-box">
                 <h4>Shipping Information</h4>
                 <p><strong>Tracking:</strong> <span id="rTrack"></span><br>
-                <strong>Carrier:</strong> <span id="rCarrier">Royal Mail</span><br>
+                <strong>Carrier:</strong> <span id="rCarrier"></span><br>
                 <strong>Packaging:</strong> Discreet/Plain Packaging</p>
             </div>
         </div>
@@ -227,7 +207,6 @@ window.onload = async () => {
     } catch (e) { alert("Sheet Connection failed!"); }
 }
 
-// Function to double the Qty
 function doubleQty() {
     let qtyInput = document.getElementById('inQty');
     let currentVal = parseInt(qtyInput.value) || 0;
@@ -292,12 +271,12 @@ function renderInvoice() {
     document.getElementById('rCust').innerText = document.getElementById('inCust').value || "Customer";
     document.getElementById('rAddr').innerText = document.getElementById('inAddr').value;
     document.getElementById('rTrack').innerText = document.getElementById('inTrack').value || "Processing";
+    document.getElementById('rCarrier').innerText = document.getElementById('inCarrier').value || "Royal Mail";
     
-    const ship = parseFloat(document.getElementById('inShipCost').value);
+    const ship = parseFloat(document.getElementById('inShipCost').value) || 0;
     const prevBal = parseFloat(document.getElementById('inPrevBal').value) || 0;
     const hasPrev = document.getElementById('hasPrevBalance').checked;
 
-    document.getElementById('rCarrier').innerText = (ship === 15) ? "Special Delivery Guaranteed" : "Royal Mail";
     document.getElementById('rShipDisp').innerText = "£" + ship.toFixed(2);
     
     if(hasPrev && prevBal > 0) {
@@ -371,4 +350,3 @@ function downloadImage() {
 </script>
 </body>
 </html>
-
